@@ -4,6 +4,7 @@ import cors from "cors";
 import { errorMiddleware } from "@/middlewares/error.js";
 import morgan from "morgan";
 import dotenv from "dotenv";
+import authRoutes from "@/routes/authenticationRoute.js";
 
 dotenv.config({ path: "./.env" });
 
@@ -28,6 +29,7 @@ app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
 
+app.use("/api/auth", authRoutes);
 
 app.get("*", (req, res) => {
   res.status(404).json({
