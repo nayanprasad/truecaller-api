@@ -4,12 +4,12 @@ import cors from "cors";
 import { errorMiddleware } from "@/middlewares/error.js";
 import morgan from "morgan";
 import dotenv from "dotenv";
-import authRoutes from "@/routes/authenticationRoute.js";
+import { authRoutes, userRoutes } from "@/routes";
 
 dotenv.config({ path: "./.env" });
 
 export const envMode = process.env.NODE_ENV?.trim() || "DEVELOPMENT";
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 const app = express();
 
@@ -30,6 +30,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/auth", userRoutes);
 
 app.get("*", (req, res) => {
   res.status(404).json({

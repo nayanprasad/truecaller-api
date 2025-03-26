@@ -17,3 +17,23 @@ export const loginSchema = z.object({
     .min(10, "Phone number must be at least 10 characters long"),
   password: z.string().min(1, "Password is required"),
 });
+
+// Update user profile schema
+export const updateProfileSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters long").optional(),
+  email: z.string().email("Invalid email address").optional().nullable(),
+});
+
+// Add contact schema
+export const addContactSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  phoneNumber: z
+      .string()
+      .min(10, "Phone number must be at least 10 characters long"),
+});
+
+
+// Update contact schema
+export const updateContactSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+});
