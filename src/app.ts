@@ -30,7 +30,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api/auth", userRoutes);
+app.use("/api/user", userRoutes);
 
 app.get("*", (req, res) => {
   res.status(404).json({
