@@ -33,7 +33,17 @@ app.get("/", (req, res) => {
 });
 
 // Swagger documentation
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(specs, {
+    explorer: true,
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+    customSiteTitle: "Truecaller API Documentation",
+  }),
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
