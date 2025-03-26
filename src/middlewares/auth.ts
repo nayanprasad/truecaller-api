@@ -1,15 +1,15 @@
 import {NextFunction, Request, Response} from "express";
 import ErrorHandler from "@/utils/errorHandler.js";
-import {verifyToken} from "@/utils/token.js";
 import prisma from "@/config/database.js";
+import {validateSession} from "@/utils/sessionManager.js";
 
 /**
- * Authentication middleware to verify user tokens
+ * Authentication middleware to verify user tokens using Redis sessions
  */
 export const isAuthenticated = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
+    req: Request,
+    res: Response,
+    next: NextFunction,
 ) => {
   try {
     // Extract token from authorization header
@@ -20,13 +20,13 @@ export const isAuthenticated = async (
 
     const token = authHeader.split(" ")[1];
 
-    // Verify token and get user ID
-    const userId = await verifyToken(token);
+    // Validate session and get user ID
+    const userId = await validateSession(token);
     if (!userId) {
       return next(new ErrorHandler(401, "Invalid or expired token"));
     }
 
-    // Get user details
+    // Get user details from database
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -44,7 +44,6 @@ export const isAuthenticated = async (
     // Attach user to request object
     req.user = user;
     next();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     next(new ErrorHandler(401, "Authentication failed"));
   }

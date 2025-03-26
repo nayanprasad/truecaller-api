@@ -5,6 +5,7 @@ import { errorMiddleware } from "@/middlewares/error.js";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import { authRoutes, lookupRoutes, userRoutes } from "@/routes";
+import redisService from "@/config/redis.js";
 
 dotenv.config({ path: "./.env" });
 
@@ -42,8 +43,33 @@ app.get("*", (req, res) => {
 
 app.use(errorMiddleware);
 
-app.listen(port, () =>
-  console.log(
-    "Server is working on Port:" + port + " in " + envMode + " Mode.",
-  ),
+const server = app.listen(port, () =>
+  console.log(`Server is working on Port: ${port} in ${envMode} Mode.`),
 );
+
+// Handle graceful shutdown
+process.on("SIGTERM", gracefulShutdown);
+process.on("SIGINT", gracefulShutdown);
+
+async function gracefulShutdown() {
+  console.log("Starting graceful shutdown...");
+
+  // Close the server
+  server.close(() => {
+    console.log("HTTP server closed");
+  });
+
+  try {
+    // Disconnect from Redis
+    await redisService.disconnect();
+    console.log("Redis connection closed");
+
+    // Add any other cleanup tasks here
+
+    console.log("Graceful shutdown completed");
+    process.exit(0);
+  } catch (error) {
+    console.error("Error during graceful shutdown:", error);
+    process.exit(1);
+  }
+}

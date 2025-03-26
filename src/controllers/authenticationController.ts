@@ -3,8 +3,8 @@ import { TryCatch } from "@/middlewares/error.js";
 import ErrorHandler from "@/utils/errorHandler.js";
 import prisma from "@/config/database.js";
 import { comparePassword, hashPassword } from "@/utils/password.js";
-import { generateToken } from "@/utils/token.js";
 import { loginSchema, registerSchema } from "@/models/validators.js";
+import { createSession, invalidateSession } from "@/utils/sessionManager.js";
 
 // Register a new user
 export const register = TryCatch(
@@ -39,19 +39,10 @@ export const register = TryCatch(
       },
     });
 
-    // Generate token
-    const token = generateToken(user.id);
-
-    // Create session
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days expiry
-
-    await prisma.session.create({
-      data: {
-        userId: user.id,
-        token,
-        expiresAt,
-      },
+    // Generate token using Redis sessions
+    const token = await createSession(user.id, {
+      name: user.name,
+      phoneNumber: user.phoneNumber,
     });
 
     // Return response
@@ -97,19 +88,11 @@ export const login = TryCatch(
       return next(new ErrorHandler(401, "Invalid phone number or password"));
     }
 
-    // Generate token
-    const token = generateToken(user.id);
-
-    // Create or update session
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days expiry
-
-    await prisma.session.create({
-      data: {
-        userId: user.id,
-        token,
-        expiresAt,
-      },
+    // Generate token using Redis sessions
+    const token = await createSession(user.id, {
+      name: user.name,
+      phoneNumber: user.phoneNumber,
+      lastLogin: new Date().toISOString(),
     });
 
     // Return response
@@ -138,10 +121,8 @@ export const logout = TryCatch(
       return next(new ErrorHandler(400, "Token is required"));
     }
 
-    // Delete the session
-    await prisma.session.deleteMany({
-      where: { token },
-    });
+    // Invalidate the session in Redis
+    await invalidateSession(token);
 
     res.status(200).json({
       success: true,

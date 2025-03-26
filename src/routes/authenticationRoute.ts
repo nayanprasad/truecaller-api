@@ -4,9 +4,14 @@ import {
   logout,
   register,
 } from "@/controllers/authenticationController.js";
+import { authRateLimit } from "@/middlewares/rateLimit";
 
 const router = express.Router();
 
+// Apply rate limiting middleware to all authentication routes
+router.use(authRateLimit);
+
+// Authentication routes
 router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", logout);
