@@ -130,12 +130,15 @@ router.use(isAuthenticated);
  *     SpamInfo:
  *       type: object
  *       properties:
- *         spamScore:
- *           type: number
- *           description: Spam score (0-100)
- *         reportCount:
- *           type: integer
- *           description: Number of spam reports
+ *         isLikelySpam:
+ *           type: boolean
+ *           description: Whether the number is likely to be spam
+ *        reportCount:
+ *          type: integer
+ *          description: Number of times this number has been reported as spam
+ *        spamLikelihood:
+ *          type: number
+ *          description: Score from 0-100 indicating spam likelihood
  */
 
 /**
