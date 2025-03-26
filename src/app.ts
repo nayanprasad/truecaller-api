@@ -6,6 +6,8 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 import { authRoutes, lookupRoutes, userRoutes } from "@/routes/index.js";
 import redisService from "@/config/redis.js";
+import swaggerUi from "swagger-ui-express";
+import { specs } from "@/config/swagger.js";
 
 dotenv.config({ path: "./.env" });
 
@@ -29,6 +31,9 @@ app.use(morgan("dev"));
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
+
+// Swagger documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
