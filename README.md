@@ -1,8 +1,8 @@
 ## Disclaimer
 
-1. This project name is not related to any existing application or service.
+1. This project is developed as a demonstration of technical capabilities and is not affiliated with, endorsed by, or connected to any commercial entity or service with a similar name
 
-2. The tech stack used in this project does not limit my expertise in other technologies. I am proficient in various programming languages, frameworks, and tools beyond what is demonstrated here and willing to master other framework as well.
+2. **The tech stack used in this project does not limit my expertise in other technologies. I am proficient in various programming languages, frameworks, and tools beyond what is demonstrated here and willing to master any other tool or framework as well.**
 
 3. I have added comprehensive documentation and code comments throughout the project. If you have any questions or need clarification, please feel free to contact me at [nayanprasad096@gmail.com](mailto:nayanprasad096@gmail.com).
 
