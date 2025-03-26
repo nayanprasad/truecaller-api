@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for registered app users
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  phoneNumber  String   @unique
+  email        String?
+  passwordHash String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  contacts    Contact[]    @relation("UserToContact") // Contacts of this user
+  spamReports SpamReport[] // Spam reports made by this user
+  contactOf   Contact[]    @relation("ContactToUser") // Users who have this user as a contact
+
+  @@map("users")
+}
+
+// Contact model for storing a user's contacts
+model Contact {
+  id          String   @id @default(uuid())
+  name        String
+  phoneNumber String
+  userId      String   @map("user_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user        User  @relation("UserToContact", fields: [userId], references: [id], onDelete: Cascade)
+  contactUser User? @relation("ContactToUser", fields: [phoneNumber], references: [phoneNumber]) // Link to User if exists
+
+  @@unique([userId, phoneNumber]) // Each user can only have a phone number once
+  @@index([phoneNumber]) // Index for better search performance
+  @@map("contacts")
+}
+
+// SpamReport model for storing user spam reports
+model SpamReport {
+  id          String   @id @default(uuid())
+  phoneNumber String
+  reportedBy  String   @map("reported_by")
+  reportedAt  DateTime @default(now()) @map("reported_at")
+
+  // Relationships
+  user User @relation(fields: [reportedBy], references: [id], onDelete: Cascade)
+
+  @@unique([reportedBy, phoneNumber]) // Each user can only report a number once
+  @@index([phoneNumber]) // Index for better performance when checking spam likelihood
+  @@map("spam_reports")
+}
+
+// Sessions for authentication
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([token])
+  @@map("sessions")
+}
