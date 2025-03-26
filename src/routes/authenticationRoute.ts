@@ -4,7 +4,7 @@ import {
   logout,
   register,
 } from "@/controllers/authenticationController.js";
-import { authRateLimit } from "@/middlewares/rateLimit";
+import { authRateLimit } from "@/middlewares/rateLimit.js";
 
 const router = express.Router();
 

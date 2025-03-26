@@ -44,6 +44,7 @@ export const isAuthenticated = async (
     // Attach user to request object
     req.user = user;
     next();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     next(new ErrorHandler(401, "Authentication failed"));
   }

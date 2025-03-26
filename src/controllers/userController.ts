@@ -7,8 +7,8 @@ import {
   reportSpamSchema,
   updateContactSchema,
   updateProfileSchema,
-} from "@/models/validators";
-import { getSpamInfo } from "@/utils/spamUtils";
+} from "@/models/validators.js";
+import { getSpamInfo } from "@/utils/spamUtils.js";
 
 // Get user profile
 export const getProfile = TryCatch(async (req: Request, res: Response) => {

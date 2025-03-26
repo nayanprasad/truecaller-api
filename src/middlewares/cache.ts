@@ -23,6 +23,7 @@ export const cacheMiddleware = (ttl = DEFAULT_CACHE_TTL) => {
       // Try to get data from cache
       const cachedData = await redisService.getJson<{
         status: number;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data: any;
       }>(cacheKey);
 
@@ -35,6 +36,7 @@ export const cacheMiddleware = (ttl = DEFAULT_CACHE_TTL) => {
       const originalSend = res.send;
 
       // Adding interceptor to capture the response
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       res.send = function (body: any): Response {
         // Only cache successful responses
         if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -67,10 +69,6 @@ export const cacheMiddleware = (ttl = DEFAULT_CACHE_TTL) => {
  */
 export const invalidateCache = async (pattern: string): Promise<void> => {
   try {
-    // Get all the keys matching the pattern
-    // Note: This would need a custom implementation with the redis v4 client
-    // that doesn't directly support key scanning with patterns
-    // For simplicity, use specific key invalidation in routes
     await redisService.del(pattern);
   } catch (error) {
     console.error("Error invalidating cache:", error);
@@ -83,8 +81,6 @@ export const invalidateCache = async (pattern: string): Promise<void> => {
  */
 export const invalidateUserCache = async (userId: string): Promise<void> => {
   try {
-    // In a real implementation, you would need to maintain a list of keys
-    // or implement a scan operation to find all keys for a user
     await invalidateCache(`cache:${userId}:*`);
   } catch (error) {
     console.error(`Error invalidating cache for user ${userId}:`, error);

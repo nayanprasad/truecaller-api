@@ -4,7 +4,7 @@ import cors from "cors";
 import { errorMiddleware } from "@/middlewares/error.js";
 import morgan from "morgan";
 import dotenv from "dotenv";
-import { authRoutes, lookupRoutes, userRoutes } from "@/routes";
+import { authRoutes, lookupRoutes, userRoutes } from "@/routes/index.js";
 import redisService from "@/config/redis.js";
 
 dotenv.config({ path: "./.env" });

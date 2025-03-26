@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import redisService from "@/config/redis";
-import prisma from "@/config/database";
+import redisService from "@/config/redis.js";
+import prisma from "@/config/database.js";
 
 const SESSION_TTL = parseInt(process.env.SESSION_TTL || "2592000"); // 30 days;
 
@@ -13,6 +13,7 @@ const SESSION_TTL = parseInt(process.env.SESSION_TTL || "2592000"); // 30 days;
  */
 export const createSession = async (
   userId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   additionalData: Record<string, any> = {},
   ttl: number = SESSION_TTL,
 ): Promise<string> => {
