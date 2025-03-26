@@ -65,6 +65,80 @@ The API is fully documented using Swagger. When the server is running, you can a
 http://localhost:8080/api-docs
 ```
 
+## API Routes
+
+### Base URL
+
+All API endpoints are prefixed with `/api`.
+
+### Authentication Routes
+
+| Method | Endpoint         | Description                                               | Authentication Required |
+|--------|------------------|-----------------------------------------------------------|-------------------------|
+| POST   | `/auth/register` | Register a new user with name, phone number, and password | No                      |
+| POST   | `/auth/login`    | Login with phone number and password                      | No                      |
+| POST   | `/auth/logout`   | Logout and invalidate token                               | Yes                     |
+
+### User Routes
+
+All user routes require authentication with a valid JWT token.
+
+| Method | Endpoint             | Description                      | Authentication Required |
+|--------|----------------------|----------------------------------|-------------------------|
+| GET    | `/user/profile`      | Get user profile information     | Yes                     |
+| PATCH  | `/user/profile`      | Update user profile information  | Yes                     |
+| GET    | `/user/contacts`     | Get all contacts with pagination | Yes                     |
+| GET    | `/user/contacts/all` | Get all contacts                 | Yes                     |
+| POST   | `/user/contacts/new` | Add a new contact                | Yes                     |
+| GET    | `/user/contacts/:id` | Get a specific contact by ID     | Yes                     |
+| PATCH  | `/user/contacts/:id` | Update a specific contact        | Yes                     | 
+| DELETE | `/user/contacts/:id` | Delete a specific contact        | Yes                     |
+| POST   | `/user/report-spam`  | Report a phone number as spam    | Yes                     |
+
+### Lookup Routes
+
+| Method | Endpoint                      | Description                                   | Authentication Required |
+|--------|-------------------------------|-----------------------------------------------|-------------------------|
+| GET    | `/lookup/search/name`         | Search for contacts by name                   | No                      |
+| GET    | `/lookup/search/phone`        | Search for contacts by phone number           | No                      |
+| GET    | `/lookup/phone/:phoneNumber`  | Get detailed information about a phone number | No                      |
+| GET    | `/lookup/premium/search/name` | Premium feature: Search for contacts by name  | Yes                     |
+
+### Request and Response Formats
+
+All API endpoints return responses in JSON format with the following structure:
+
+```json
+{
+   "success": true/false,
+   "message": "Optional message",
+   "data": {
+      /* Response data */
+   },
+   "pagination": {
+      /* Pagination info if applicable */
+   }
+}
+```
+
+### Authentication
+
+Authentication is implemented using JWT (JSON Web Tokens). To access protected routes:
+
+1. Obtain a token by registering or logging in
+2. Include the token in the Authorization header of subsequent requests:
+   ```
+   Authorization: Bearer <your_token>
+   ```
+
+### Rate Limiting
+
+The API implements rate limiting to prevent abuse:
+
+- Authentication routes: 10 requests per minute
+- Lookup routes: 100 requests per minute
+- User routes: 100 requests per minute
+
 ## Environment Variables
 
 Create a `.env` file in the root directory with the following variables:

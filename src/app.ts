@@ -45,9 +45,9 @@ app.use(
   }),
 );
 
-app.use("/api/auth", authRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/lookup", lookupRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/lookup", lookupRoutes);
 
 app.get("*", (req, res) => {
   res.status(404).json({
