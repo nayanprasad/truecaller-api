@@ -31,6 +31,7 @@ This API service allows users to:
 - **Authentication**: Custom token-based authentication
 - **Rate Limiting**: Redis-based rate limiting
 - **Validation**: Zod for request validation
+- **CI / CD**: GitHub Actions.
 
 ## Features
 
@@ -299,3 +300,16 @@ The application uses the following data models:
 - Rate limiting to prevent brute force attacks
 - Input validation using Zod
 - Helmet middleware for HTTP security headers
+
+## CI/CD Pipeline
+
+Note: _This project is not publicly available on GitHub and not hosted on a live server. The CI/CD pipeline is for demonstration purposes only._
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+- **Continuous Integration**: Automated testing and code quality checks on each push
+- **Continuous Deployment**: Automated deployment to staging (main branch) and production (prod branch) environments
+- **Docker Integration**: Builds and pushes Docker images to Docker Hub
+- **EC2 Deployment**: Automatically deploys the latest image to EC2 instances
+
+The CI/CD pipeline ensures that code changes are automatically tested, built, and deployed to the appropriate environment.
