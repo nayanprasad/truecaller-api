@@ -92,11 +92,25 @@ class RedisService {
     }
   }
 
-  public async del(key: string): Promise<void> {
+  public async del(...keys: string[]): Promise<void> {
     if (!this.client || !this.isConnected) {
       await this.connect();
     }
-    await this.client!.del(key);
+    if (keys.length > 0) {
+      await this.client!.del(keys);
+    }
+  }
+
+  /**
+   * Find keys matching a pattern
+   * @param pattern Pattern to match (e.g., "user:*")
+   * @returns Array of matching keys
+   */
+  public async keys(pattern: string): Promise<string[]> {
+    if (!this.client || !this.isConnected) {
+      await this.connect();
+    }
+    return this.client!.keys(pattern);
   }
 
   public async exists(key: string): Promise<boolean> {

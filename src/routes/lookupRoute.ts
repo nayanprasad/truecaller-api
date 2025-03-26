@@ -5,7 +5,7 @@ import {
   searchByName,
   searchByPhone,
 } from "@/controllers/lookupController.js";
-import { cacheMiddleware } from "@/middlewares/cache.js";
+import { CACHE_PREFIXES, cacheMiddleware } from "@/middlewares/cache.js";
 import { rateLimitMiddleware } from "@/middlewares/rateLimit.js";
 import { isAuthenticated } from "@/middlewares/auth.js";
 
@@ -17,18 +17,30 @@ router.use(rateLimitMiddleware());
 router.post("/phone", lookupPhone);
 
 // Add caching to search endpoints (5 minutes TTL)
-router.get("/search/name", cacheMiddleware(300), searchByName);
-router.get("/search/phone", cacheMiddleware(300), searchByPhone);
+router.get(
+  "/search/name",
+  cacheMiddleware(300, CACHE_PREFIXES.SEARCH),
+  searchByName,
+);
+router.get(
+  "/search/phone",
+  cacheMiddleware(300, CACHE_PREFIXES.SEARCH),
+  searchByPhone,
+);
 
 // Phone details caching (10 minutes TTL)
-router.get("/details/:phoneNumber", cacheMiddleware(600), getDetailedInfo);
+router.get(
+  "/details/:phoneNumber",
+  cacheMiddleware(600, CACHE_PREFIXES.USER),
+  getDetailedInfo,
+);
 
 // Premium endpoints with stricter rate limits and authentication
 router.get(
   "/premium/search/name",
   isAuthenticated,
   rateLimitMiddleware({ maxRequests: 500 }),
-  cacheMiddleware(300),
+  cacheMiddleware(300, CACHE_PREFIXES.SEARCH),
   searchByName,
 );
 

@@ -9,6 +9,11 @@ import {
   updateProfileSchema,
 } from "@/models/validators.js";
 import { getSpamInfo } from "@/utils/spamUtils.js";
+import {
+  invalidateContactRelatedCache,
+  invalidateSpamRelatedCache,
+  invalidateUserRelatedCache,
+} from "@/utils/cacheUtils.js";
 
 // Get user profile
 export const getProfile = TryCatch(async (req: Request, res: Response) => {
@@ -50,6 +55,9 @@ export const updateProfile = TryCatch(
         email: true,
       },
     });
+
+    // Invalidate cache for this user
+    await invalidateUserRelatedCache(req.user!.id, updatedUser.phoneNumber);
 
     res.status(200).json({
       success: true,
@@ -162,6 +170,9 @@ export const addContact = TryCatch(
       },
     });
 
+    // Invalidate cache for contacts and search results
+    await invalidateContactRelatedCache(req.user!.id, phoneNumber);
+
     res.status(201).json({
       success: true,
       message: "Contact added successfully",
@@ -225,6 +236,12 @@ export const updateContact = TryCatch(
       data: { name },
     });
 
+    // Invalidate cache for this contact
+    await invalidateContactRelatedCache(
+      req.user!.id,
+      updatedContact.phoneNumber,
+    );
+
     res.status(200).json({
       success: true,
       message: "Contact updated successfully",
@@ -250,10 +267,16 @@ export const deleteContact = TryCatch(
       return next(new ErrorHandler(404, "Contact not found"));
     }
 
+    // Store phone number before deletion for cache invalidation
+    const phoneNumber = existingContact.phoneNumber;
+
     // Delete contact
     await prisma.contact.delete({
       where: { id },
     });
+
+    // Invalidate cache for this contact
+    await invalidateContactRelatedCache(req.user!.id, phoneNumber);
 
     res.status(200).json({
       success: true,
@@ -298,6 +321,9 @@ export const reportSpam = TryCatch(
         reportedBy: req.user!.id,
       },
     });
+
+    // Invalidate spam-related cache
+    await invalidateSpamRelatedCache(phoneNumber);
 
     // Get updated spam information
     const updatedSpamInfo = await getSpamInfo(phoneNumber);
