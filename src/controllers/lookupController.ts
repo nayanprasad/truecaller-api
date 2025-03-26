@@ -16,86 +16,6 @@ import {
 } from "@/types/types.js";
 
 /**
- * Look up a phone number to get user info and spam status
- */
-export const lookupPhone = TryCatch(
-  async (req: Request, res: Response, next: NextFunction) => {
-    // Validate input
-    const validation = phoneLookupSchema.safeParse(req.body);
-    if (!validation.success) {
-      return next(new ErrorHandler(400, validation.error.errors[0].message));
-    }
-
-    const { phoneNumber } = validation.data;
-
-    // Find user by phone number
-    const user = await prisma.user.findUnique({
-      where: { phoneNumber },
-      select: {
-        id: true,
-        name: true,
-        phoneNumber: true,
-        email: true,
-      },
-    });
-
-    // Check for contact in user's contacts and if the requester is in the user's contacts
-    let contactName = null;
-    let showEmail = false;
-
-    if (req.user) {
-      // Check if the requester has the phone number in their contacts
-      const contact = await prisma.contact.findUnique({
-        where: {
-          userId_phoneNumber: {
-            userId: req.user.id,
-            phoneNumber,
-          },
-        },
-        select: { name: true },
-      });
-
-      if (contact) {
-        contactName = contact.name;
-      }
-
-      // Check if the requester is in the user's contacts (if user exists)
-      if (user) {
-        const isInContacts = await prisma.contact.findUnique({
-          where: {
-            userId_phoneNumber: {
-              userId: user.id,
-              phoneNumber: req.user.phoneNumber,
-            },
-          },
-        });
-
-        showEmail = !!isInContacts;
-      }
-    }
-
-    // Get spam information
-    const spamInfo = await getSpamInfo(phoneNumber);
-
-    res.status(200).json({
-      success: true,
-      data: {
-        phoneNumber,
-        registeredUser: user
-          ? {
-              name: user.name,
-              phoneNumber: user.phoneNumber,
-              email: showEmail ? user.email : undefined, // Only show email if requester is in user's contacts
-            }
-          : null,
-        contact: contactName ? { name: contactName } : null,
-        spamInfo,
-      },
-    });
-  },
-);
-
-/**
  * Search for people by name in the global database
  */
 export const searchByName = TryCatch(
@@ -113,6 +33,38 @@ export const searchByName = TryCatch(
 
     const skip = (page - 1) * limit;
 
+    // Count total results for pagination
+    const totalStartsWithCount = await prisma.user.count({
+      where: {
+        name: { startsWith: query, mode: "insensitive" },
+      },
+    });
+
+    const totalContainsCount = await prisma.user.count({
+      where: {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+        NOT: { name: { startsWith: query, mode: "insensitive" } },
+      },
+    });
+
+    const totalContactsCount = await prisma.contact.count({
+      where: {
+        name: { contains: query, mode: "insensitive" },
+      },
+    });
+
+    // Calculate total count (approximate since we'll remove duplicates later)
+    const approximateTotalCount =
+      totalStartsWithCount + totalContainsCount + totalContactsCount;
+
+    // Calculate how many records to fetch from each source
+    // We'll need to fetch more than just the limit to account for duplicates and pagination
+    // A reasonable approach is to fetch 2x the limit from each source
+    const fetchSize = limit * 2;
+
     // First group: names starting with query (higher priority)
     const startsWithResults: UserSearchResult[] = await prisma.user.findMany({
       where: {
@@ -123,6 +75,7 @@ export const searchByName = TryCatch(
         name: true,
         phoneNumber: true,
       },
+      take: fetchSize,
     });
 
     // Second group: names containing query but not starting with it
@@ -139,6 +92,7 @@ export const searchByName = TryCatch(
         name: true,
         phoneNumber: true,
       },
+      take: fetchSize,
     });
 
     // Also search in contacts (people might have different names for the same number)
@@ -153,6 +107,7 @@ export const searchByName = TryCatch(
           phoneNumber: true,
         },
         distinct: ["phoneNumber"],
+        take: fetchSize,
       },
     );
 
@@ -198,8 +153,11 @@ export const searchByName = TryCatch(
     // Sort by priority
     uniqueResults.sort((a, b) => a.priority - b.priority);
 
-    // Get all phone numbers to fetch spam info in bulk
-    const phoneNumbers: string[] = uniqueResults.map(
+    // Apply pagination to the unique results
+    const paginatedResults = uniqueResults.slice(skip, skip + limit);
+
+    // Get all phone numbers to fetch spam info in bulk (only for the paginated results)
+    const phoneNumbers: string[] = paginatedResults.map(
       (result) => result.phoneNumber,
     );
 
@@ -207,18 +165,16 @@ export const searchByName = TryCatch(
     const spamInfoMap: SpamInfoMap = await getBulkSpamInfo(phoneNumbers);
 
     // Combine spam info with results
-    const resultsWithSpamInfo: SearchResultWithSpamInfo[] = uniqueResults.map(
-      (result) => ({
+    const resultsWithSpamInfo: SearchResultWithSpamInfo[] =
+      paginatedResults.map((result) => ({
         ...result,
         spamInfo: spamInfoMap[result.phoneNumber],
-      }),
-    );
+      }));
 
-    // Apply pagination
-    const paginatedResults: SearchResultWithSpamInfo[] =
-      resultsWithSpamInfo.slice(skip, skip + limit);
-    const totalCount: number = resultsWithSpamInfo.length;
-    const totalPages: number = Math.ceil(totalCount / limit);
+    // Calculate actual total count and pages after deduplication
+    // This is an approximation since we're not fetching all records
+    const totalCount = Math.min(approximateTotalCount, uniqueResults.length);
+    const totalPages = Math.ceil(totalCount / limit);
 
     const response: SearchResponse = {
       success: true,
@@ -230,7 +186,7 @@ export const searchByName = TryCatch(
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
       },
-      data: paginatedResults.map(
+      data: resultsWithSpamInfo.map(
         (r): SearchResponseDataItem => ({
           name: r.name,
           phoneNumber: r.phoneNumber,

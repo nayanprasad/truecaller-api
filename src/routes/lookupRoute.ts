@@ -1,7 +1,6 @@
 import express from "express";
 import {
   getDetailedInfo,
-  lookupPhone,
   searchByName,
   searchByPhone,
 } from "@/controllers/lookupController.js";
@@ -13,8 +12,6 @@ const router = express.Router();
 
 // Apply rate limiting to all lookup routes
 router.use(rateLimitMiddleware());
-
-router.post("/phone", lookupPhone);
 
 // Add caching to search endpoints (5 minutes TTL)
 router.get(
