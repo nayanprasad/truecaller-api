@@ -37,3 +37,32 @@ export const addContactSchema = z.object({
 export const updateContactSchema = z.object({
   name: z.string().min(1, "Name is required"),
 });
+
+// Phone lookup schema
+export const phoneLookupSchema = z.object({
+  phoneNumber: z
+      .string()
+      .min(10, "Phone number must be at least 10 characters long"),
+});
+
+// Search by name schema
+export const searchByNameSchema = z.object({
+  query: z.string().min(1, 'Search query is required'),
+  page: z.number().int().positive().optional().default(1),
+  limit: z.number().int().positive().optional().default(10),
+});
+
+// Search by phone schema
+export const searchByPhoneSchema = z.object({
+  query: z.string().min(1, 'Search query is required'),
+  page: z.number().int().positive().optional().default(1),
+  limit: z.number().int().positive().optional().default(10),
+});
+
+// Report spam schema
+export const reportSpamSchema = z.object({
+  phoneNumber: z
+      .string()
+      .min(10, "Phone number must be at least 10 characters long"),
+});
+

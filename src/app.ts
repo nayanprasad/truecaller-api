@@ -4,7 +4,7 @@ import cors from "cors";
 import { errorMiddleware } from "@/middlewares/error.js";
 import morgan from "morgan";
 import dotenv from "dotenv";
-import { authRoutes, userRoutes } from "@/routes";
+import { authRoutes, lookupRoutes, userRoutes } from "@/routes";
 
 dotenv.config({ path: "./.env" });
 
@@ -31,6 +31,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/lookup", lookupRoutes);
 
 app.get("*", (req, res) => {
   res.status(404).json({

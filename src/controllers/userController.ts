@@ -4,9 +4,11 @@ import ErrorHandler from "@/utils/errorHandler.js";
 import prisma from "@/config/database.js";
 import {
   addContactSchema,
+  reportSpamSchema,
   updateContactSchema,
   updateProfileSchema,
 } from "@/models/validators";
+import { getSpamInfo } from "@/utils/spamUtils";
 
 // Get user profile
 export const getProfile = TryCatch(async (req: Request, res: Response) => {
@@ -256,6 +258,56 @@ export const deleteContact = TryCatch(
     res.status(200).json({
       success: true,
       message: "Contact deleted successfully",
+    });
+  },
+);
+
+/**
+ * Report a number as spam
+ */
+export const reportSpam = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // Validate input
+    const validation = reportSpamSchema.safeParse(req.body);
+    if (!validation.success) {
+      return next(new ErrorHandler(400, validation.error.errors[0].message));
+    }
+
+    const { phoneNumber } = validation.data;
+
+    // Check if user has already reported this number
+    const existingReport = await prisma.spamReport.findUnique({
+      where: {
+        reportedBy_phoneNumber: {
+          reportedBy: req.user!.id,
+          phoneNumber,
+        },
+      },
+    });
+
+    if (existingReport) {
+      return next(
+        new ErrorHandler(409, "You have already reported this number"),
+      );
+    }
+
+    // Create spam report
+    await prisma.spamReport.create({
+      data: {
+        phoneNumber,
+        reportedBy: req.user!.id,
+      },
+    });
+
+    // Get updated spam information
+    const updatedSpamInfo = await getSpamInfo(phoneNumber);
+
+    res.status(201).json({
+      success: true,
+      message: "Number reported as spam successfully",
+      data: {
+        spamInfo: updatedSpamInfo,
+      },
     });
   },
 );

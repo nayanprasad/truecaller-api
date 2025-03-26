@@ -7,6 +7,7 @@ import {
   getContact,
   getContacts,
   getProfile,
+  reportSpam,
   updateContact,
   updateProfile,
 } from "@/controllers/userController.js";
@@ -27,5 +28,8 @@ router.post("/contacts/new", addContact);
 router.get("/contacts/:id", getContact);
 router.patch("/contacts/:id", updateContact);
 router.delete("/contacts/:id", deleteContact);
+
+// Report spam route
+router.post("/report-spam", reportSpam);
 
 export default router;
