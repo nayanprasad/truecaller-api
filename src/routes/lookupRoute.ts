@@ -92,12 +92,10 @@ router.use(rateLimitMiddleware());
 /**
  * @swagger
  * tags:
- *   name: Lookup
- *   description: Phone number lookup and search operations
- *
- * tags:
- *   name: Premium
- *   description: Premium features requiring authentication
+ *   - name: Lookup
+ *     description: Phone number lookup and search operations
+ *   - name: Premium
+ *     description: Premium features requiring authentication
  */
 
 /**

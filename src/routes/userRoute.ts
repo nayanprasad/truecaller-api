@@ -133,12 +133,12 @@ router.use(isAuthenticated);
  *         isLikelySpam:
  *           type: boolean
  *           description: Whether the number is likely to be spam
- *        reportCount:
- *          type: integer
- *          description: Number of times this number has been reported as spam
- *        spamLikelihood:
- *          type: number
- *          description: Score from 0-100 indicating spam likelihood
+ *         reportCount:
+ *           type: integer
+ *           description: Number of times this number has been reported as spam
+ *         spamLikelihood:
+ *           type: number
+ *           description: Score from 0-100 indicating spam likelihood
  */
 
 /**
@@ -175,7 +175,7 @@ router.get("/profile", cacheMiddleware(300, CACHE_PREFIXES.USER), getProfile);
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
- *      description: Requires authentication with a valid JWT token in the Authorization header (Bearer token)
+ *     description: Requires authentication with a valid JWT token in the Authorization header (Bearer token)
  *     requestBody:
  *       required: true
  *       content:
