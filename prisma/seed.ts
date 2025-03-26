@@ -344,6 +344,7 @@ async function main() {
 main()
   .catch((e) => {
     console.error("Error during seeding:", e);
+    // @ts-expect-error -- this is safe
     process.exit(1);
   })
   .finally(async () => {
