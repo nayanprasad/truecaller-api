@@ -1,0 +1,93 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+      - prod
+  workflow_dispatch:
+
+jobs:
+  build-and-push-staging:
+    if: github.ref == 'refs/heads/main'   # This job runs only for the main branch (staging)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Repo
+        uses: actions/checkout@v2
+
+      - name: Create .env file
+        run: echo "${{ vars.ENV_STAGING }}" > .env
+
+      - name: Log in to Docker Hub (Staging)
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker image (Staging)
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          push: true
+          tags: nayanprasad/truecaller-api:latest
+
+      - name: Verify Pushed Image
+        run: docker pull nayanprasad/truecaller-api:latest
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo ${{ secrets.DOCKER_PASSWORD }} | sudo docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+            sudo docker pull nayanprasad/truecaller-api:latest
+            sudo docker stop truecaller-api || true
+            sudo docker rm truecaller-api || true
+            sudo docker run -e NODE_ENV=staging -d --name truecaller-api -p 3000:3000 nayanprasad/truecaller-api:latest
+            sudo docker system prune -af || true
+
+  build-and-push-production:
+    if: github.ref == 'refs/heads/prod'   # This job runs only for the prod branch (production)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Repo
+        uses: actions/checkout@v2
+        with:
+          ref: prod
+
+      - name: Create .env file
+        run: echo "${{ vars.ENV_PROD }}" > .env
+
+      - name: Log in to Docker Hub (Production)
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.PROD_DOCKER_USERNAME }}
+          password: ${{ secrets.PROD_DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker image (Production)
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          push: true
+          tags: nayanprasad/truecaller-api:prod-${{ github.sha }}
+
+      - name: Verify Pushed Image
+        run: docker pull nayanprasad/truecaller-api:prod-${{ github.sha }}
+
+      - name: Deploy to EC2 (Production)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USERNAME }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            echo ${{ secrets.PROD_DOCKER_PASSWORD }} | sudo docker login -u ${{ secrets.PROD_DOCKER_USERNAME }} --password-stdin
+            sudo docker pull nayanprasad/truecaller-api:prod-${{ github.sha }}
+            sudo docker stop truecaller-api-prod || true
+            sudo docker rm truecaller-api-prod || true
+            sudo docker run -e NODE_ENV=production -d --name truecaller-api-prod -p 3001:3000 nayanprasad/truecaller-api:prod-${{ github.sha }}
+            sudo docker system prune -af || true
