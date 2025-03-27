@@ -32,6 +32,7 @@ This API service allows users to:
 - **Rate Limiting**: Redis-based rate limiting
 - **Validation**: Zod for request validation
 - **CI / CD**: GitHub Actions.
+- **Version Control**: Git
 
 ## Features
 
