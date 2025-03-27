@@ -16,16 +16,19 @@ const port = process.env.PORT || 8080;
 
 const app = express();
 
+// For security headers
 app.use(
   helmet({
     contentSecurityPolicy: envMode !== "DEVELOPMENT",
     crossOriginEmbedderPolicy: envMode !== "DEVELOPMENT",
   }),
 );
-
+// For parsing JSON and URL encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// For CORS
 app.use(cors({ origin: " * ", credentials: true }));
+// For logging
 app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
@@ -49,6 +52,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/lookup", lookupRoutes);
 
+// For other routes
 app.get("*", (req, res) => {
   res.status(404).json({
     success: false,
@@ -78,8 +82,6 @@ async function gracefulShutdown() {
     // Disconnect from Redis
     await redisService.disconnect();
     console.log("Redis connection closed");
-
-    // Add any other cleanup tasks here
 
     console.log("Graceful shutdown completed");
     process.exit(0);

@@ -302,6 +302,44 @@ The application uses the following data models:
 - Input validation using Zod
 - Helmet middleware for HTTP security headers
 
+## Design Patterns Used
+
+The project implements several design patterns to ensure maintainability, scalability, and code organization:
+
+### 1. Middleware Pattern
+- **Error Handling Middleware**: Centralized error handling through custom middleware
+- **Authentication Middleware**: JWT token validation and user authentication
+- **Caching Middleware**: Redis-based response caching for improved performance
+- **Rate Limiting Middleware**: Protection against API abuse
+
+### 2. Repository Pattern
+- Separation of data access logic using Prisma ORM
+- Abstraction of database operations from business logic
+
+### 3. Decorator Pattern
+- `TryCatch` decorator for wrapping controller functions with error handling
+- Reduces boilerplate code and ensures consistent error management
+
+### 4. Factory Pattern
+- Creation of response objects with consistent structure
+- Error handler factory for generating standardized error responses
+
+### 5. Singleton Pattern
+- Database connection management
+- Redis service implementation ensuring single instance
+
+### 6. Proxy Pattern
+- Cache implementation acting as a proxy to database access
+- Intercepts and caches API responses
+
+### 7. Observer Pattern
+- Event-based cache invalidation when data changes
+
+### 8. MVC Architecture
+- Clear separation of Models, Views (API responses), and Controllers
+- Organized code structure following REST principles
+
+
 ## CI/CD Pipeline
 
 Note: _This project is not publicly available on GitHub and not hosted on a live server. The CI/CD pipeline is for demonstration purposes only._
@@ -331,5 +369,3 @@ If given more time, the following features and improvements could be implemented
 - Enable password reset via OTP
 
 ### 3. Uses the preferred framework for the project
-
-
