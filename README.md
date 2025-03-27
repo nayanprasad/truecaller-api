@@ -218,9 +218,9 @@ docker run -p 8080:8080 --env-file .env truecaller-api
 ### Prerequisites
 
 - Node.js (v20 or later)
-- npm
-- PostgreSQL (if running locally)
-- Redis (if running locally)
+- npm (v7 or later)
+- PostgreSQL (if running without Docker)
+- Redis (if running without Docker)
 
 ### Setup
 
@@ -314,3 +314,22 @@ This project uses GitHub Actions for continuous integration and deployment:
 - **EC2 Deployment**: Automatically deploys the latest image to EC2 instances
 
 The CI/CD pipeline ensures that code changes are automatically tested, built, and deployed to the appropriate environment.
+
+## Future Scope and Things to Do
+
+If given more time, the following features and improvements could be implemented:
+
+### 1. Integration Testing
+- Set up comprehensive integration test suite using Jest and Supertest
+- Implement database mocking for test environment
+- Add CI/CD pipeline for automated testing
+- Create test coverage reports
+- Implement end-to-end API testing
+
+### 2. Phone Number OTP Verification
+- Implement SMS-based OTP verification for user registration
+- Enable password reset via OTP
+
+### 3. Uses the preferred framework for the project
+
+
