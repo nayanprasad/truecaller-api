@@ -12,8 +12,9 @@
     "paths": {
         "@/*": ["src/*"]
     },
-    "typeRoots": ["./src/types"],
-    "resolveJsonModule": true
+    "typeRoots": ["./src/types", "./node_modules/@types"],
+    "resolveJsonModule": true,
+    "types": ["node", "jest"]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
   "exclude": ["node_modules", "dist"]
