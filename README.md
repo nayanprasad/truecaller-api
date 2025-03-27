@@ -368,4 +368,8 @@ If given more time, the following features and improvements could be implemented
 - Implement SMS-based OTP verification for user registration
 - Enable password reset via OTP
 
-### 3. Uses the preferred framework for the project
+### 3. Monitoring and Health Checks
+- Implement comprehensive application monitoring.
+- Add health check endpoints for all services (API, database, Redis)
+
+### 4. Uses the preferred framework for the project
